@@ -44,7 +44,10 @@ public class UrlShortenerResource {
 	@GET
 	@Path("{id}")
 	@Timed
+	// TODO - This should return a POJO, not a Response
 	public Response expandUrl(@PathParam("id") String id) {
+		// TODO - Why this shouldn't be done: http://12factor.net
+		// TODO - Enhancements should be entered as "Feature Requests" on GitHub
 		// TODO ENHANCEMENT - log this expansion into a new table in the DB
 		// (date/time, user's IP, other info from request?)
 		try {
@@ -75,6 +78,7 @@ public class UrlShortenerResource {
 	@Timed
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.APPLICATION_JSON)
+	// TODO - This should return a POJO, not a Response
 	public Response addShortenedUrl(String fullUrl) {
 		try {
 			if (fullUrl != null && fullUrl.length() > 0 && fullUrl.length() < 2048) {

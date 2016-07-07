@@ -11,6 +11,7 @@ import org.skife.jdbi.v2.sqlobject.SqlUpdate;
  * @author Matthew Groves <matthew.b.groves@gmail.com>
  *
  */
+// TODO - Look into Liquibase/Automapper
 public interface UrlDAO {
 	@SqlUpdate("CREATE TABLE IF NOT EXISTS urls (id BIGINT AUTO_INCREMENT PRIMARY KEY, url VARCHAR(2048))")
 	void createUrlsTableIfNeeded();

@@ -1,3 +1,10 @@
+httpConnection:
+  # the hostname of our web server
+  host: localhost
+
+  # the port to use
+  port: 8080
+
 database:
   # the name of your JDBC driver
   driverClass: com.mysql.cj.jdbc.Driver

@@ -36,11 +36,12 @@ public class UrlShortenerApplication extends Application<UrlShortenerConfigurati
 	@Override
 	public void run(UrlShortenerConfiguration configuration, Environment environment) throws Exception {
 		// TODO - Set up Docker for MySQL DB
-		// TODO - Apply principles from here: http://www.dropwizard.io/0.9.3/docs/manual/core.html
+		// TODO - Apply principles from here:
+		// http://www.dropwizard.io/0.9.3/docs/manual/core.html
 		
 		final DBIFactory factory = new DBIFactory();
 		final DBI jdbi = factory.build(environment, configuration.getDataSourceFactory(), "mysql");
 		final UrlDAO dao = jdbi.onDemand(UrlDAO.class);
-		environment.jersey().register(new UrlShortenerResource(dao));
+		environment.jersey().register(new UrlShortenerResource(dao, configuration.getHttpConnectionFactory()));
 	}
 }

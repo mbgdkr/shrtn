@@ -23,4 +23,13 @@ public class UrlShortenerConfiguration extends Configuration {
 	public DataSourceFactory getDataSourceFactory() {
 		return database;
 	}
+	
+	@Valid
+	@NotNull
+	@JsonProperty
+	private HttpConnectionFactory httpConnection = new HttpConnectionFactory();
+	
+	public HttpConnectionFactory getHttpConnectionFactory() {
+		return httpConnection;
+	}
 }

@@ -1,9 +1,12 @@
 package matthewgroves.urlShortener.resources;
 
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -34,19 +37,51 @@ public class UrlShortenerResource {
 	}
 	
 	/**
-	 * Gets the full URL for the desired shortened URL {@link id}
+	 * Redirects to the full URL for the desired shortened URL {@link id}
 	 * 
 	 * @param id
 	 *            - the id argument to lookup in the DB and expand to a full URL
 	 * @return Redirects user to expanded URL, if it exists. Otherwise, sends a
 	 *         404 status. If an exception occurs, a 500 status is sent with the
 	 *         exception in the response body.
+	 * @throws URISyntaxException 
+	 * @throws IOException
 	 */
 	@GET
-	@Path("{id}")
 	@Timed
-	// TODO - This should return a POJO, not a Response
-	public Response expandUrl(@PathParam("id") String id) {
+	@Path("{id}")
+	public Response redirectUrl(@PathParam("id") String id) throws URISyntaxException {
+		ShortenedUrl sUrl = expandUrl(id);
+		URI redirectTo = new URI(sUrl.getFullUrl());
+		return Response.seeOther(redirectTo).build();
+	}
+	
+	/**
+	 * Gets the full URL for the desired shortened URL {@link id}
+	 * 
+	 * @param id
+	 *            - the id argument to lookup in the DB and expand to a full URL
+	 * @return Gets the expanded URL, if it exists. Otherwise, sends a 404
+	 *         status. If an exception occurs, a 500 status is sent with the
+	 *         exception in the response body.
+	 * @throws IOException
+	 */
+	@GET
+	@Timed
+	@Path("{id}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public ShortenedUrl getExpandedUrl(@PathParam("id") String id) {
+		return expandUrl(id);
+	}
+	
+	/**
+	 * Helper function
+	 * 
+	 * @param id
+	 *            - the id argument to lookup in the DB and expand to a full URL
+	 * @return The expanded URI for the specified {@link id}
+	 */
+	private ShortenedUrl expandUrl(String id) {
 		// TODO - Why this shouldn't be done: http://12factor.net
 		// TODO - Enhancements should be entered as "Feature Requests" on GitHub
 		// TODO ENHANCEMENT - log this expansion into a new table in the DB
@@ -57,14 +92,15 @@ public class UrlShortenerResource {
 			long idVal = Long.parseLong(id, 36);
 			String url = dao.findUrlById(idVal);
 			if (url != null) {
-				URI redirectTo = new URI(url);
-				return Response.seeOther(redirectTo).build();
+				ShortenedUrl sUrl = new ShortenedUrl(idVal, url,
+						"http://localhost:8080/shrtn/" + Long.toString(idVal, 36));
+				return sUrl;
 			}
 		} catch (Exception e) {
-			return Response.serverError().entity(e).build();
+			throw new WebApplicationException(e);
 		}
 		
-		return Response.status(404).build();
+		throw new NotFoundException();
 	}
 	
 	/**

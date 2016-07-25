@@ -1,9 +1,5 @@
-httpConnection:
-  # the hostname of our web server
-  host: localhost
-
-  # the port to use
-  port: 8080
+# the hostname of our web server
+hostname: localhost
 
 database:
   # the name of your JDBC driver

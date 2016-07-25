@@ -13,7 +13,7 @@ import javax.ws.rs.core.Response;
 
 import com.codahale.metrics.annotation.Timed;
 
-import matthewgroves.urlShortener.HttpConnectionFactory;
+import matthewgroves.urlShortener.UrlShortenerConfiguration;
 import matthewgroves.urlShortener.api.ShortenedUrl;
 import matthewgroves.urlShortener.db.UrlDAO;
 
@@ -26,11 +26,11 @@ import matthewgroves.urlShortener.db.UrlDAO;
 @Path("shrtn")
 public class UrlShortenerResource {
 	private UrlDAO dao;
-	private HttpConnectionFactory httpConnection;
+	private UrlShortenerConfiguration config;
 	
-	public UrlShortenerResource(UrlDAO dao, HttpConnectionFactory httpConnection) {
+	public UrlShortenerResource(UrlDAO dao, UrlShortenerConfiguration config) {
 		this.dao = dao;
-		this.httpConnection = httpConnection;
+		this.config = config;
 		
 		this.dao.createUrlsTableIfNeeded();
 	}
@@ -87,8 +87,8 @@ public class UrlShortenerResource {
 			if (fullUrl != null && fullUrl.length() > 0 && fullUrl.length() < 2048) {
 				long id = dao.insertUrl(fullUrl);
 				
-				ShortenedUrl sUrl = new ShortenedUrl(id, fullUrl, "http://" + httpConnection.getHost() + ":"
-						+ httpConnection.getPort() + "/shrtn/" + Long.toString(id, 36));
+				ShortenedUrl sUrl = new ShortenedUrl(id, fullUrl, "http://" + config.getHostname() + ":"
+						+ config.getRuntimePort() + "/shrtn/" + Long.toString(id, 36));
 				return Response.ok().entity(sUrl).build();
 			}
 		} catch (Exception e) {

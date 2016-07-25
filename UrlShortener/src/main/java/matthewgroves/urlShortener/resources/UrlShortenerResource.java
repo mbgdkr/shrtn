@@ -8,6 +8,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -51,7 +52,8 @@ public class UrlShortenerResource {
 		// TODO ENHANCEMENT - log this expansion into a new table in the DB
 		// (date/time, user's IP, other info from request?)
 		try {
-			// The id portion of a shortened URL is really just the base-36 encoded version of its id in the database
+			// The id portion of a shortened URL is really just the base-36
+			// encoded version of its id in the database
 			long idVal = Long.parseLong(id, 36);
 			String url = dao.findUrlById(idVal);
 			if (url != null) {
@@ -78,19 +80,13 @@ public class UrlShortenerResource {
 	@Timed
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.APPLICATION_JSON)
-	// TODO - This should return a POJO, not a Response
-	public Response addShortenedUrl(String fullUrl) {
-		try {
-			if (fullUrl != null && fullUrl.length() > 0 && fullUrl.length() < 2048) {
-				long id = dao.insertUrl(fullUrl);
-				ShortenedUrl sUrl = new ShortenedUrl(id, fullUrl,
-						"http://localhost:8080/shrtn/" + Long.toString(id, 36));
-				return Response.ok().entity(sUrl).build();
-			}
-		} catch (Exception e) {
-			return Response.serverError().entity(e).build();
+	public ShortenedUrl addShortenedUrl(String fullUrl) {
+		if (fullUrl != null && fullUrl.length() > 0 && fullUrl.length() < 2048) {
+			long id = dao.insertUrl(fullUrl);
+			ShortenedUrl sUrl = new ShortenedUrl(id, fullUrl, "http://localhost:8080/shrtn/" + Long.toString(id, 36));
+			return sUrl;
 		}
 		
-		return Response.serverError().build();
+		throw new WebApplicationException("Invalid fullUrl");
 	}
 }

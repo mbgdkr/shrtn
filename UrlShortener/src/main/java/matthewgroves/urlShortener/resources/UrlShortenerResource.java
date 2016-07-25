@@ -13,6 +13,7 @@ import javax.ws.rs.core.Response;
 
 import com.codahale.metrics.annotation.Timed;
 
+import matthewgroves.urlShortener.UrlShortenerConfiguration;
 import matthewgroves.urlShortener.api.ShortenedUrl;
 import matthewgroves.urlShortener.db.UrlDAO;
 
@@ -25,9 +26,11 @@ import matthewgroves.urlShortener.db.UrlDAO;
 @Path("shrtn")
 public class UrlShortenerResource {
 	private UrlDAO dao;
+	private UrlShortenerConfiguration config;
 	
-	public UrlShortenerResource(UrlDAO dao) {
+	public UrlShortenerResource(UrlDAO dao, UrlShortenerConfiguration config) {
 		this.dao = dao;
+		this.config = config;
 		
 		this.dao.createUrlsTableIfNeeded();
 	}
@@ -47,11 +50,11 @@ public class UrlShortenerResource {
 	// TODO - This should return a POJO, not a Response
 	public Response expandUrl(@PathParam("id") String id) {
 		// TODO - Why this shouldn't be done: http://12factor.net
-		// TODO - Enhancements should be entered as "Feature Requests" on GitHub
 		// TODO ENHANCEMENT - log this expansion into a new table in the DB
 		// (date/time, user's IP, other info from request?)
 		try {
-			// The id portion of a shortened URL is really just the base-36 encoded version of its id in the database
+			// The id portion of a shortened URL is really just the base-36
+			// encoded version of its id in the database
 			long idVal = Long.parseLong(id, 36);
 			String url = dao.findUrlById(idVal);
 			if (url != null) {
@@ -83,8 +86,9 @@ public class UrlShortenerResource {
 		try {
 			if (fullUrl != null && fullUrl.length() > 0 && fullUrl.length() < 2048) {
 				long id = dao.insertUrl(fullUrl);
-				ShortenedUrl sUrl = new ShortenedUrl(id, fullUrl,
-						"http://localhost:8080/shrtn/" + Long.toString(id, 36));
+				
+				ShortenedUrl sUrl = new ShortenedUrl(id, fullUrl, "http://" + config.getHostname() + ":"
+						+ config.getRuntimePort() + "/shrtn/" + Long.toString(id, 36));
 				return Response.ok().entity(sUrl).build();
 			}
 		} catch (Exception e) {

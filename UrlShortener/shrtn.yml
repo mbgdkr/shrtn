@@ -1,3 +1,6 @@
+# the hostname of our web server
+hostname: localhost
+
 database:
   # the name of your JDBC driver
   driverClass: com.mysql.cj.jdbc.Driver

@@ -5,6 +5,8 @@ import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.net.URISyntaxException;
+
 import javax.ws.rs.core.Response;
 
 import org.junit.Before;
@@ -36,23 +38,23 @@ public class UrlShortenerResourceTest {
 		config.setHostname("www.shortener.com");
 		config.configurePort(12345);
 		
-		ShortenedUrl response = (ShortenedUrl) resource.addShortenedUrl("www.google.com").getEntity();
+		ShortenedUrl response = (ShortenedUrl) resource.addShortenedUrl("www.google.com");
 		
 		assertThat(response.getShortenedUrl()).contains(config.getHostname())
 				.contains(Integer.toString(config.getRuntimePort()));
 	}
 	
 	@Test
-	public void linkNotFound() {
-		assertThat(resource.expandUrl("10").getStatus()).isEqualTo(Response.Status.NOT_FOUND.getStatusCode());
+	public void linkNotFound() throws URISyntaxException {
+		assertThat(resource.redirectUrl("10").getStatus()).isEqualTo(Response.Status.NOT_FOUND.getStatusCode());
 	}
 	
 	@Test
-	public void linkFound() {
+	public void linkFound() throws URISyntaxException {
 		final String EXAMPLE = "http://www.example.com";
 		when(dao.findUrlById(anyLong())).thenReturn(EXAMPLE);
 		
-		Response res = resource.expandUrl("10");
+		Response res = resource.redirectUrl("10");
 		
 		assertThat(res.getStatus()).isEqualTo(Response.Status.SEE_OTHER.getStatusCode());
 		

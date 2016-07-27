@@ -130,6 +130,12 @@ public class UrlShortenerResource {
 	 * @return The shortened URL
 	 */
 	private String formShortUrl(long id) {
-		return "http://" + config.getHostname() + ":" + config.getRuntimePort() + "/shrtn/" + Long.toString(id, 36);
+		int portNum = config.getRuntimePort();
+		String portStr = "";
+		// Only use the port number if it is not the default
+		if(portNum != 80)
+			portStr = ":" + portNum;
+		
+		return "http://" + config.getHostname() + portStr + "/shrtn/" + Long.toString(id, 36);
 	}
 }

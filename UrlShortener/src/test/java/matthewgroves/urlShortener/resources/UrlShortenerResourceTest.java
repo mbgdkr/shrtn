@@ -31,7 +31,7 @@ public class UrlShortenerResourceTest {
 		
 		config = new UrlShortenerConfiguration();
 		config.setHostname("localhost");
-		config.configurePort(8080);
+		config.setRuntimePort(8080);
 		
 		resource = new UrlShortenerResource(dao, config);
 	}
@@ -39,12 +39,21 @@ public class UrlShortenerResourceTest {
 	@Test
 	public void configurableUrlBase() throws Exception {
 		config.setHostname("www.shortener.com");
-		config.configurePort(12345);
+		config.setRuntimePort(12345);
 		
 		ShortenedUrl response = (ShortenedUrl) resource.addShortenedUrl("www.google.com");
 		
 		assertThat(response.getShortenedUrl()).contains(config.getHostname())
 				.contains(Integer.toString(config.getRuntimePort()));
+	}
+	
+	@Test
+	public void hideDefaultPort() throws Exception {
+		config.setRuntimePort(80);
+		
+		ShortenedUrl response = (ShortenedUrl) resource.addShortenedUrl("www.google.com");
+		
+		assertThat(response.getShortenedUrl()).contains(config.getHostname()).doesNotContain(Integer.toString(config.getRuntimePort()));
 	}
 	
 	@Test

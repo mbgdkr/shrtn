@@ -113,7 +113,7 @@ public class UrlShortenerResource {
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.APPLICATION_JSON)
 	public ShortenedUrl addShortenedUrl(String fullUrl) {
-		if (fullUrl == null || fullUrl.length() == 0 || fullUrl.length() >= 2048)
+		if (fullUrl == null || fullUrl.length() == 0 || fullUrl.length() > 2048)
 			throw new WebApplicationException("Invalid fullUrl");
 		
 		long id = dao.insertUrl(fullUrl);

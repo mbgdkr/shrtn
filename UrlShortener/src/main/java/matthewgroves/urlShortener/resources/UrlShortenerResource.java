@@ -95,8 +95,7 @@ public class UrlShortenerResource {
 		if (url == null)
 			throw new NotFoundException();
 		
-		ShortenedUrl sUrl = new ShortenedUrl(idVal, url, "http://" + config.getHostname() + ":"
-				+ config.getRuntimePort() + "/shrtn/" + Long.toString(idVal, 36));
+		ShortenedUrl sUrl = new ShortenedUrl(idVal, url, formShortUrl(idVal));
 		return sUrl;
 	}
 	
@@ -119,8 +118,18 @@ public class UrlShortenerResource {
 		
 		long id = dao.insertUrl(fullUrl);
 		
-		ShortenedUrl sUrl = new ShortenedUrl(id, fullUrl,
-				"http://" + config.getHostname() + ":" + config.getRuntimePort() + "/shrtn/" + Long.toString(id, 36));
+		ShortenedUrl sUrl = new ShortenedUrl(id, fullUrl, formShortUrl(id));
 		return sUrl;
+	}
+	
+	/**
+	 * Utility function to create a shortened URL given an {@link id}
+	 * 
+	 * @param id
+	 *            - the ID of the URL entry
+	 * @return The shortened URL
+	 */
+	private String formShortUrl(long id) {
+		return "http://" + config.getHostname() + ":" + config.getRuntimePort() + "/shrtn/" + Long.toString(id, 36);
 	}
 }

@@ -88,21 +88,16 @@ public class UrlShortenerResource {
 		// TODO - Why this shouldn't be done: http://12factor.net
 		// TODO ENHANCEMENT - log this expansion into a new table in the DB
 		// (date/time, user's IP, other info from request?)
-		try {
-			// The id portion of a shortened URL is really just the base-36
-			// encoded version of its id in the database
-			long idVal = Long.parseLong(id, 36);
-			String url = dao.findUrlById(idVal);
-			if (url != null) {
-				ShortenedUrl sUrl = new ShortenedUrl(idVal, url, "http://" + config.getHostname() + ":"
-						+ config.getRuntimePort() + "/shrtn/" + Long.toString(idVal, 36));
-				return sUrl;
-			}
-		} catch (Exception e) {
-			throw new WebApplicationException(e);
-		}
+		// The id portion of a shortened URL is really just the base-36 encoded
+		// version of its id in the database
+		long idVal = Long.parseLong(id, 36);
+		String url = dao.findUrlById(idVal);
+		if (url == null)
+			throw new NotFoundException();
 		
-		throw new NotFoundException();
+		ShortenedUrl sUrl = new ShortenedUrl(idVal, url, "http://" + config.getHostname() + ":"
+				+ config.getRuntimePort() + "/shrtn/" + Long.toString(idVal, 36));
+		return sUrl;
 	}
 	
 	/**
@@ -119,18 +114,13 @@ public class UrlShortenerResource {
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.APPLICATION_JSON)
 	public ShortenedUrl addShortenedUrl(String fullUrl) {
-		try {
-			if (fullUrl != null && fullUrl.length() > 0 && fullUrl.length() < 2048) {
-				long id = dao.insertUrl(fullUrl);
-				
-				ShortenedUrl sUrl = new ShortenedUrl(id, fullUrl, "http://" + config.getHostname() + ":"
-						+ config.getRuntimePort() + "/shrtn/" + Long.toString(id, 36));
-				return sUrl;
-			}
-		} catch (Exception e) {
-			throw new WebApplicationException(e);
-		}
+		if (fullUrl == null || fullUrl.length() == 0 || fullUrl.length() >= 2048)
+			throw new WebApplicationException("Invalid fullUrl");
 		
-		throw new WebApplicationException("Invalid fullUrl");
+		long id = dao.insertUrl(fullUrl);
+		
+		ShortenedUrl sUrl = new ShortenedUrl(id, fullUrl,
+				"http://" + config.getHostname() + ":" + config.getRuntimePort() + "/shrtn/" + Long.toString(id, 36));
+		return sUrl;
 	}
 }

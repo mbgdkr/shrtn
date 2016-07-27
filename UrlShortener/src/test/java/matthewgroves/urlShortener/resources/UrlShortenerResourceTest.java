@@ -7,8 +7,10 @@ import static org.mockito.Mockito.when;
 
 import java.net.URISyntaxException;
 
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,12 +47,18 @@ public class UrlShortenerResourceTest {
 	}
 	
 	@Test
-	public void linkNotFound() throws URISyntaxException {
-		assertThat(resource.redirectUrl("10").getStatus()).isEqualTo(Response.Status.NOT_FOUND.getStatusCode());
+	public void redirectLinkNotFound() throws URISyntaxException {
+		// when
+		Throwable thrown = Assertions.catchThrowable(() -> {
+			resource.redirectUrl("10");
+		});
+		
+		// then
+		assertThat(thrown).isInstanceOf(NotFoundException.class);
 	}
 	
 	@Test
-	public void linkFound() throws URISyntaxException {
+	public void redirectLinkFound() throws URISyntaxException {
 		final String EXAMPLE = "http://www.example.com";
 		when(dao.findUrlById(anyLong())).thenReturn(EXAMPLE);
 		
@@ -60,5 +68,4 @@ public class UrlShortenerResourceTest {
 		
 		assertThat(res.getLocation().toString()).isEqualTo(EXAMPLE);
 	}
-	
 }

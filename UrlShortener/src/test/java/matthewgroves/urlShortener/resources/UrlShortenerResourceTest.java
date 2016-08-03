@@ -11,7 +11,6 @@ import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
-import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -26,7 +25,7 @@ public class UrlShortenerResourceTest {
 	UrlShortenerResource resource;
 	
 	@Before
-	public void setupDao() throws Exception {
+	public void setupDao() {
 		dao = mock(UrlDAO.class);
 		
 		config = new UrlShortenerConfiguration();
@@ -37,7 +36,7 @@ public class UrlShortenerResourceTest {
 	}
 	
 	@Test
-	public void configurableUrlBase() throws Exception {
+	public void configurableUrlBase() {
 		config.setHostname("www.shortener.com");
 		config.setRuntimePort(12345);
 		
@@ -48,7 +47,7 @@ public class UrlShortenerResourceTest {
 	}
 	
 	@Test
-	public void hideDefaultPort() throws Exception {
+	public void hideDefaultPort() {
 		config.setRuntimePort(80);
 		
 		ShortenedUrl response = (ShortenedUrl) resource.addShortenedUrl("www.google.com");
@@ -56,15 +55,9 @@ public class UrlShortenerResourceTest {
 		assertThat(response.getShortenedUrl()).contains(config.getHostname()).doesNotContain(Integer.toString(config.getRuntimePort()));
 	}
 	
-	@Test
+	@Test(expected = NotFoundException.class)
 	public void redirectLinkNotFound() throws URISyntaxException {
-		// when
-		Throwable thrown = Assertions.catchThrowable(() -> {
-			resource.redirectUrl("10");
-		});
-		
-		// then
-		assertThat(thrown).isInstanceOf(NotFoundException.class);
+		resource.redirectUrl("10");
 	}
 	
 	@Test
@@ -79,19 +72,13 @@ public class UrlShortenerResourceTest {
 		assertThat(res.getLocation().toString()).isEqualTo(EXAMPLE);
 	}
 	
-	@Test
-	public void apiLinkNotFound() throws URISyntaxException {
-		// when
-		Throwable thrown = Assertions.catchThrowable(() -> {
-			resource.getExpandedUrl("10");
-		});
-		
-		// then
-		assertThat(thrown).isInstanceOf(NotFoundException.class);
+	@Test(expected = NotFoundException.class)
+	public void apiLinkNotFound() {
+		resource.getExpandedUrl("10");
 	}
 	
 	@Test
-	public void apiLinkFound() throws URISyntaxException {
+	public void apiLinkFound() {
 		final String EXAMPLE_URL = "http://www.example.com";
 		when(dao.findUrlById(anyLong())).thenReturn(EXAMPLE_URL);
 		
@@ -103,42 +90,24 @@ public class UrlShortenerResourceTest {
 		assertThat(result.getId()).isEqualTo(EXAMPLE_ID);
 	}
 	
-	@Test
+	@Test(expected = WebApplicationException.class)
 	public void addNullUrl() {
-		// when
-		Throwable thrown = Assertions.catchThrowable(() -> {
-			resource.addShortenedUrl(null);
-		});
-		
-		// then
-		assertThat(thrown).isInstanceOf(WebApplicationException.class);
+		resource.addShortenedUrl(null);
 	}
 	
-	@Test
+	@Test(expected = WebApplicationException.class)
 	public void addZeroLengthUrl() {
-		// when
-		Throwable thrown = Assertions.catchThrowable(() -> {
-			resource.addShortenedUrl("");
-		});
-		
-		// then
-		assertThat(thrown).isInstanceOf(WebApplicationException.class);
+		resource.addShortenedUrl("");
 	}
 	
-	@Test
+	@Test(expected = WebApplicationException.class)
 	public void addTooLongUrl() {
 		final int BIG_STRING_SIZE = 3000;
 		StringBuilder BIG_STRING = new StringBuilder(BIG_STRING_SIZE);
 		for(int i = 0; i < BIG_STRING_SIZE; ++i)
 			BIG_STRING.append('a');
 		
-		// when
-		Throwable thrown = Assertions.catchThrowable(() -> {
-			resource.addShortenedUrl(BIG_STRING.toString());
-		});
-		
-		// then
-		assertThat(thrown).isInstanceOf(WebApplicationException.class);
+		resource.addShortenedUrl(BIG_STRING.toString());
 	}
 	
 //TODO - need to add detection for this

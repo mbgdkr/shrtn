@@ -1,13 +1,17 @@
 package matthewgroves.urlShortener.resources;
 
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -36,36 +40,63 @@ public class UrlShortenerResource {
 	}
 	
 	/**
-	 * Gets the full URL for the desired shortened URL {@link id}
+	 * Redirects to the full URL for the desired shortened URL {@link id}
 	 * 
 	 * @param id
 	 *            - the id argument to lookup in the DB and expand to a full URL
 	 * @return Redirects user to expanded URL, if it exists. Otherwise, sends a
 	 *         404 status. If an exception occurs, a 500 status is sent with the
 	 *         exception in the response body.
+	 * @throws URISyntaxException
+	 * @throws IOException
 	 */
 	@GET
-	@Path("{id}")
 	@Timed
-	// TODO - This should return a POJO, not a Response
-	public Response expandUrl(@PathParam("id") String id) {
+	@Path("{id}")
+	public Response redirectUrl(@PathParam("id") String id) throws URISyntaxException {
+		ShortenedUrl sUrl = expandUrl(id);
+		URI redirectTo = new URI(sUrl.getFullUrl());
+		return Response.seeOther(redirectTo).build();
+	}
+	
+	/**
+	 * Gets the full URL for the desired shortened URL {@link id}
+	 * 
+	 * @param id
+	 *            - the id argument to lookup in the DB and expand to a full URL
+	 * @return Gets the expanded URL, if it exists. Otherwise, sends a 404
+	 *         status. If an exception occurs, a 500 status is sent with the
+	 *         exception in the response body.
+	 * @throws IOException
+	 */
+	@GET
+	@Timed
+	@Path("{id}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public ShortenedUrl getExpandedUrl(@PathParam("id") String id) {
+		return expandUrl(id);
+	}
+	
+	/**
+	 * Helper function
+	 * 
+	 * @param id
+	 *            - the id argument to lookup in the DB and expand to a full URL
+	 * @return The expanded URI for the specified {@link id}
+	 */
+	private ShortenedUrl expandUrl(String id) {
 		// TODO - Why this shouldn't be done: http://12factor.net
 		// TODO ENHANCEMENT - log this expansion into a new table in the DB
 		// (date/time, user's IP, other info from request?)
-		try {
-			// The id portion of a shortened URL is really just the base-36
-			// encoded version of its id in the database
-			long idVal = Long.parseLong(id, 36);
-			String url = dao.findUrlById(idVal);
-			if (url != null) {
-				URI redirectTo = new URI(url);
-				return Response.seeOther(redirectTo).build();
-			}
-		} catch (Exception e) {
-			return Response.serverError().entity(e).build();
-		}
+		// The id portion of a shortened URL is really just the base-36 encoded
+		// version of its id in the database
+		long idVal = Long.parseLong(id, 36);
+		String url = dao.findUrlById(idVal);
+		if (url == null)
+			throw new NotFoundException();
 		
-		return Response.status(404).build();
+		ShortenedUrl sUrl = new ShortenedUrl(idVal, url, formShortUrl(idVal));
+		return sUrl;
 	}
 	
 	/**
@@ -81,20 +112,24 @@ public class UrlShortenerResource {
 	@Timed
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.APPLICATION_JSON)
-	// TODO - This should return a POJO, not a Response
-	public Response addShortenedUrl(String fullUrl) {
-		try {
-			if (fullUrl != null && fullUrl.length() > 0 && fullUrl.length() < 2048) {
-				long id = dao.insertUrl(fullUrl);
-				
-				ShortenedUrl sUrl = new ShortenedUrl(id, fullUrl, "http://" + config.getHostname() + ":"
-						+ config.getRuntimePort() + "/shrtn/" + Long.toString(id, 36));
-				return Response.ok().entity(sUrl).build();
-			}
-		} catch (Exception e) {
-			return Response.serverError().entity(e).build();
-		}
+	public ShortenedUrl addShortenedUrl(String fullUrl) {
+		if (fullUrl == null || fullUrl.length() == 0 || fullUrl.length() > 2048)
+			throw new WebApplicationException("Invalid fullUrl");
 		
-		return Response.serverError().build();
+		long id = dao.insertUrl(fullUrl);
+		
+		ShortenedUrl sUrl = new ShortenedUrl(id, fullUrl, formShortUrl(id));
+		return sUrl;
+	}
+	
+	/**
+	 * Utility function to create a shortened URL given an {@link id}
+	 * 
+	 * @param id
+	 *            - the ID of the URL entry
+	 * @return The shortened URL
+	 */
+	private String formShortUrl(long id) {
+		return "http://" + config.getHostname() + ":" + config.getRuntimePort() + "/shrtn/" + Long.toString(id, 36);
 	}
 }

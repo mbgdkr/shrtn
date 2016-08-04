@@ -1,4 +1,4 @@
-package matthewgroves.urlShortener.db;
+package com.matthewgroves.shrtn.jdbi;
 
 import org.skife.jdbi.v2.sqlobject.Bind;
 import org.skife.jdbi.v2.sqlobject.GetGeneratedKeys;

@@ -2,12 +2,12 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>matthewgroves</groupId>
-	<artifactId>urlShortener</artifactId>
+	<groupId>com.matthewgroves</groupId>
+	<artifactId>shrtn</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>urlShortener</name>
+	<name>shrtn</name>
 	<url>http://maven.apache.org</url>
 
 	<properties>
@@ -82,7 +82,7 @@
 									implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>matthewgroves.urlShortener.UrlShortenerApplication</mainClass>
+									<mainClass>com.matthewgroves.shrtn.ShrtnApplication</mainClass>
 								</transformer>
 							</transformers>
 						</configuration>

@@ -1,4 +1,4 @@
-package matthewgroves.urlShortener.resources;
+package com.matthewgroves.shrtn.resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.anyLong;
@@ -14,25 +14,25 @@ import javax.ws.rs.core.Response;
 import org.junit.Before;
 import org.junit.Test;
 
-import matthewgroves.urlShortener.UrlShortenerConfiguration;
-import matthewgroves.urlShortener.api.ShortenedUrl;
-import matthewgroves.urlShortener.db.UrlDAO;
+import com.matthewgroves.shrtn.ShrtnConfiguration;
+import com.matthewgroves.shrtn.api.ShortenedUrl;
+import com.matthewgroves.shrtn.jdbi.UrlDAO;
 
-public class UrlShortenerResourceTest {
+public class ShrtnResourceTest {
 	
 	UrlDAO dao;
-	UrlShortenerConfiguration config;
-	UrlShortenerResource resource;
+	ShrtnConfiguration config;
+	ShrtnResource resource;
 	
 	@Before
 	public void setupDao() {
 		dao = mock(UrlDAO.class);
 		
-		config = new UrlShortenerConfiguration();
+		config = new ShrtnConfiguration();
 		config.setHostname("localhost");
 		config.setRuntimePort(8080);
 		
-		resource = new UrlShortenerResource(dao, config);
+		resource = new ShrtnResource(dao, config);
 	}
 	
 	@Test
@@ -52,7 +52,8 @@ public class UrlShortenerResourceTest {
 		
 		ShortenedUrl response = (ShortenedUrl) resource.addShortenedUrl("www.google.com");
 		
-		assertThat(response.getShortenedUrl()).contains(config.getHostname()).doesNotContain(Integer.toString(config.getRuntimePort()));
+		assertThat(response.getShortenedUrl()).contains(config.getHostname())
+				.doesNotContain(Integer.toString(config.getRuntimePort()));
 	}
 	
 	@Test(expected = NotFoundException.class)
@@ -104,24 +105,24 @@ public class UrlShortenerResourceTest {
 	public void addTooLongUrl() {
 		final int BIG_STRING_SIZE = 3000;
 		StringBuilder BIG_STRING = new StringBuilder(BIG_STRING_SIZE);
-		for(int i = 0; i < BIG_STRING_SIZE; ++i)
+		for (int i = 0; i < BIG_STRING_SIZE; ++i)
 			BIG_STRING.append('a');
 		
 		resource.addShortenedUrl(BIG_STRING.toString());
 	}
 	
-//TODO - need to add detection for this
-//	
-//	@Test
-//	public void addMalformedUrl() {
-//		// when
-//		Throwable thrown = Assertions.catchThrowable(() -> {
-//			resource.addShortenedUrl("bar");
-//		});
-//		
-//		// then
-//		assertThat(thrown).isInstanceOf(WebApplicationException.class);
-//	}
+	// TODO - need to add detection for this
+	//
+	// @Test
+	// public void addMalformedUrl() {
+	// // when
+	// Throwable thrown = Assertions.catchThrowable(() -> {
+	// resource.addShortenedUrl("bar");
+	// });
+	//
+	// // then
+	// assertThat(thrown).isInstanceOf(WebApplicationException.class);
+	// }
 	
 	@Test
 	public void addValidUrl() {

@@ -1,17 +1,18 @@
-package matthewgroves.urlShortener;
+package com.matthewgroves.shrtn;
 
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.skife.jdbi.v2.DBI;
 
+import com.matthewgroves.shrtn.jdbi.UrlDAO;
+import com.matthewgroves.shrtn.resources.ShrtnResource;
+
 import io.dropwizard.Application;
 import io.dropwizard.jdbi.DBIFactory;
 import io.dropwizard.lifecycle.ServerLifecycleListener;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import matthewgroves.urlShortener.db.UrlDAO;
-import matthewgroves.urlShortener.resources.UrlShortenerResource;
 
 /**
  * The main application class for the URL shortener
@@ -19,9 +20,9 @@ import matthewgroves.urlShortener.resources.UrlShortenerResource;
  * @author Matthew Groves <matthew.b.groves@gmail.com>
  *
  */
-public class UrlShortenerApplication extends Application<UrlShortenerConfiguration> {
+public class ShrtnApplication extends Application<ShrtnConfiguration> {
 	public static void main(String[] args) throws Exception {
-		new UrlShortenerApplication().run(args);
+		new ShrtnApplication().run(args);
 	}
 	
 	@Override
@@ -30,7 +31,7 @@ public class UrlShortenerApplication extends Application<UrlShortenerConfigurati
 	}
 	
 	@Override
-	public void initialize(Bootstrap<UrlShortenerConfiguration> bootstrap) {
+	public void initialize(Bootstrap<ShrtnConfiguration> bootstrap) {
 		// nothing to do yet
 	}
 	
@@ -38,7 +39,7 @@ public class UrlShortenerApplication extends Application<UrlShortenerConfigurati
 	 * Initialize services
 	 */
 	@Override
-	public void run(final UrlShortenerConfiguration configuration, Environment environment) throws Exception {
+	public void run(final ShrtnConfiguration configuration, Environment environment) throws Exception {
 		// TODO - Set up Docker for MySQL DB
 		// TODO - Apply principles from here:
 		// http://www.dropwizard.io/0.9.3/docs/manual/core.html
@@ -61,6 +62,6 @@ public class UrlShortenerApplication extends Application<UrlShortenerConfigurati
 		final DBIFactory factory = new DBIFactory();
 		final DBI jdbi = factory.build(environment, configuration.getDataSourceFactory(), "mysql");
 		final UrlDAO dao = jdbi.onDemand(UrlDAO.class);
-		environment.jersey().register(new UrlShortenerResource(dao, configuration));
+		environment.jersey().register(new ShrtnResource(dao, configuration));
 	}
 }

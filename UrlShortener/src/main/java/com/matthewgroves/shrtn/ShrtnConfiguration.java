@@ -1,4 +1,4 @@
-package matthewgroves.urlShortener;
+package com.matthewgroves.shrtn;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -21,7 +21,7 @@ import io.dropwizard.server.SimpleServerFactory;
  * @author Matthew Groves <matthew.b.groves@gmail.com>
  *
  */
-public class UrlShortenerConfiguration extends Configuration {
+public class ShrtnConfiguration extends Configuration {
 	@Valid
 	@NotNull
 	@JsonProperty

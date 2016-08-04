@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>matthewgroves</groupId>
-  <artifactId>urlShortener</artifactId>
-  <name>urlShortener</name>
+  <groupId>com.matthewgroves</groupId>
+  <artifactId>shrtn</artifactId>
+  <name>shrtn</name>
   <version>0.0.1-SNAPSHOT</version>
   <url>http://maven.apache.org</url>
   <build>
@@ -21,7 +21,7 @@
               <transformers>
                 <transformer />
                 <transformer>
-                  <mainClass>matthewgroves.urlShortener.UrlShortenerApplication</mainClass>
+                  <mainClass>com.matthewgroves.shrtn.ShrtnApplication</mainClass>
                 </transformer>
               </transformers>
             </configuration>

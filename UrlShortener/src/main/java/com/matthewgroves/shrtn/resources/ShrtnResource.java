@@ -1,4 +1,4 @@
-package matthewgroves.urlShortener.resources;
+package com.matthewgroves.shrtn.resources;
 
 import java.io.IOException;
 import java.net.URI;
@@ -16,10 +16,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.codahale.metrics.annotation.Timed;
-
-import matthewgroves.urlShortener.UrlShortenerConfiguration;
-import matthewgroves.urlShortener.api.ShortenedUrl;
-import matthewgroves.urlShortener.db.UrlDAO;
+import com.matthewgroves.shrtn.ShrtnConfiguration;
+import com.matthewgroves.shrtn.api.ShortenedUrl;
+import com.matthewgroves.shrtn.jdbi.UrlDAO;
 
 /**
  * The /shrtn resource class
@@ -28,11 +27,11 @@ import matthewgroves.urlShortener.db.UrlDAO;
  *
  */
 @Path("shrtn")
-public class UrlShortenerResource {
+public class ShrtnResource {
 	private UrlDAO dao;
-	private UrlShortenerConfiguration config;
+	private ShrtnConfiguration config;
 	
-	public UrlShortenerResource(UrlDAO dao, UrlShortenerConfiguration config) {
+	public ShrtnResource(UrlDAO dao, ShrtnConfiguration config) {
 		this.dao = dao;
 		this.config = config;
 		
@@ -133,7 +132,7 @@ public class UrlShortenerResource {
 		int portNum = config.getRuntimePort();
 		String portStr = "";
 		// Only use the port number if it is not the default
-		if(portNum != 80)
+		if (portNum != 80)
 			portStr = ":" + portNum;
 		
 		return "http://" + config.getHostname() + portStr + "/shrtn/" + Long.toString(id, 36);

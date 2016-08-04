@@ -1,4 +1,4 @@
-package matthewgroves.urlShortener.api;
+package com.matthewgroves.shrtn.api;
 
 import org.hibernate.validator.constraints.Length;
 
